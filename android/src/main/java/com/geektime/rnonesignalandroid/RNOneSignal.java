@@ -68,7 +68,7 @@ public class RNOneSignal extends ReactContextBaseJavaModule implements Lifecycle
         registerNotificationsReceivedNotification();
 
         OneSignal.sdkType = "react";
-        OneSignal.startInit(mApplicationContext)
+        OneSignal.startInit(activity)
                 .setNotificationOpenedHandler(new NotificationOpenedHandler(mReactContext))
                 .setNotificationReceivedHandler(new NotificationReceivedHandler(mReactContext))
                 .init();
