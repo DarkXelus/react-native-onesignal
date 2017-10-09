@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
@@ -23,6 +24,9 @@ import com.onesignal.OneSignal;
 import org.json.JSONObject;
 import org.json.JSONException;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 /**
  * Created by Avishay on 1/31/16.
@@ -32,23 +36,23 @@ public class RNOneSignal extends ReactContextBaseJavaModule implements Lifecycle
     public static final String NOTIFICATION_RECEIVED_INTENT_FILTER = "GTNotificationReceived";
 
     private ReactContext mReactContext;
+    private Context mApplicationContext;
     private boolean oneSignalInitDone;
+
+    private volatile OneSignalLifecycleState currentState;
+    private ConcurrentHashMap<Integer,Bundle> pendingOpenedNotifBundles = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer,Bundle> pendingReceivedNotifBundles = new ConcurrentHashMap<>();
 
     public RNOneSignal(ReactApplicationContext reactContext) {
         super(reactContext);
         mReactContext = reactContext;
+        mApplicationContext = reactContext.getApplicationContext();
         mReactContext.addLifecycleEventListener(this);
         initOneSignal();
     }
 
-    // Initialize OneSignal only once when an Activity is available.
-    // React creates an instance of this class to late for OneSignal to get the current Activity
-    // based on registerActivityLifecycleCallbacks it uses to listen for the first Activity.
-    // However it seems it is also to soon to call getCurrentActivity() from the reactContext as well.
-    // This will normally succeed when onHostResume fires instead.
     private void initOneSignal() {
-        Activity activity = getCurrentActivity();
-        if (activity == null || oneSignalInitDone)
+        if (oneSignalInitDone)
             return;
 
         // Uncomment to debug init issues.
@@ -60,7 +64,7 @@ public class RNOneSignal extends ReactContextBaseJavaModule implements Lifecycle
         registerNotificationsReceivedNotification();
 
         OneSignal.sdkType = "react";
-        OneSignal.startInit(activity)
+        OneSignal.startInit(mApplicationContext)
                 .setNotificationOpenedHandler(new NotificationOpenedHandler(mReactContext))
                 .setNotificationReceivedHandler(new NotificationReceivedHandler(mReactContext))
                 .init();
@@ -181,7 +185,15 @@ public class RNOneSignal extends ReactContextBaseJavaModule implements Lifecycle
         mReactContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                notifyNotificationReceived(intent.getExtras());
+                Bundle receivedNotifBundle = intent.getExtras();
+
+                if(currentState == OneSignalLifecycleState.DESTROYED)
+                    Log.i("OneSignal", "app is destroyed - adding pending received notif");
+
+                if(currentState == OneSignalLifecycleState.DESTROYED)
+                    pendingReceivedNotifBundles.put(receivedNotifBundle.hashCode(), receivedNotifBundle);
+                else
+                    notifyNotificationReceived(receivedNotifBundle);
             }
         }, intentFilter);
     }
@@ -191,7 +203,15 @@ public class RNOneSignal extends ReactContextBaseJavaModule implements Lifecycle
         mReactContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                notifyNotificationOpened(intent.getExtras());
+                Bundle openedNotifBundle = intent.getExtras();
+
+                if(currentState == OneSignalLifecycleState.DESTROYED)
+                    Log.i("OneSignal", "app is destroyed - adding pending opened notif");
+
+                if(currentState == OneSignalLifecycleState.DESTROYED)
+                    pendingOpenedNotifBundles.put(openedNotifBundle.hashCode(), openedNotifBundle);
+                else
+                    notifyNotificationOpened(openedNotifBundle);
             }
         }, intentFilter);
     }
@@ -221,17 +241,48 @@ public class RNOneSignal extends ReactContextBaseJavaModule implements Lifecycle
 
     @Override
     public void onHostDestroy() {
-
+        Log.i("OneSignal", "onHostDestroy");
+        currentState = OneSignalLifecycleState.DESTROYED;
     }
 
     @Override
     public void onHostPause() {
-
+        Log.i("OneSignal", "onHostPause");
+        currentState = OneSignalLifecycleState.PAUSED;
     }
 
     @Override
     public void onHostResume() {
         initOneSignal();
+
+        if(!pendingOpenedNotifBundles.isEmpty()) {
+            Log.i("OneSignal", "pending opened notifications");
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    for(Map.Entry<Integer,Bundle> pendingOpenedNotif : pendingOpenedNotifBundles.entrySet()) {
+                        Log.i("OneSignal", "sending event for pending opened notifs");
+                        notifyNotificationOpened(pendingOpenedNotif.getValue());
+                    }
+                }
+            },1000);
+        }
+
+        if(!pendingReceivedNotifBundles.isEmpty()) {
+            Log.i("OneSignal", "pending received notifications");
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    for(Map.Entry<Integer,Bundle> pendingReceivedNotif : pendingReceivedNotifBundles.entrySet()) {
+                        Log.i("OneSignal", "sending event for pending received notifs");
+                        notifyNotificationReceived(pendingReceivedNotif.getValue());
+                    }
+                }
+            },1000);
+        }
     }
 
+    private enum OneSignalLifecycleState {
+        RESUMED, PAUSED, DESTROYED
+    }
 }
