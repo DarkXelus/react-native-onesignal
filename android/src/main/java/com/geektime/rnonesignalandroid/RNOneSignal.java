@@ -269,7 +269,7 @@ public class RNOneSignal extends ReactContextBaseJavaModule implements Lifecycle
                         notifyNotificationOpened(pendingOpenedNotif.getValue());
                     }
                 }
-            },1000);
+            },5000);
         }
 
         if(!pendingReceivedNotifBundles.isEmpty()) {
@@ -282,7 +282,7 @@ public class RNOneSignal extends ReactContextBaseJavaModule implements Lifecycle
                         notifyNotificationReceived(pendingReceivedNotif.getValue());
                     }
                 }
-            },1000);
+            },5000);
         }
     }
 
