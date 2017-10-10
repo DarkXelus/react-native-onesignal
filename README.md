@@ -396,7 +396,7 @@ OneSignal.getPermissionSubscriptionState((status) => {
 ### Post Notification (Peer-to-Peer Notifications)
 
 Currently supports one Player ID to send a notification to.
-It is internally called 'p2p_notification', and therefore there is a special attribute to listen to while receiving the notification.
+It is internally called `p2p_notification`, and therefore there is a special attribute to listen to while receiving the notification.
 
 *Allows you to send notifications from user to user or schedule ones in the future to be delivered to the current device.*
 
