@@ -223,18 +223,18 @@ public class RNOneSignal extends ReactContextBaseJavaModule implements Lifecycle
             }
 
             OneSignal.postNotification(
-                    postNotification,
-                    new OneSignal.PostNotificationResponseHandler() {
-                        @Override
-                        public void onSuccess(JSONObject response) {
-                            Log.i("OneSignal", "postNotification Success: " + response.toString());
-                        }
-
-                        @Override
-                        public void onFailure(JSONObject response) {
-                            Log.e("OneSignal", "postNotification Failure: " + response.toString());
-                        }
+                postNotification,
+                new OneSignal.PostNotificationResponseHandler() {
+                    @Override
+                    public void onSuccess(JSONObject response) {
+                        Log.i("OneSignal", "postNotification Success: " + response.toString());
                     }
+
+                    @Override
+                    public void onFailure(JSONObject response) {
+                        Log.e("OneSignal", "postNotification Failure: " + response.toString());
+                    }
+                }
             );
         } catch (JSONException e) {
             e.printStackTrace();
