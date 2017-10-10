@@ -99,7 +99,9 @@ In your `AndroidManifest.xml`
     .....
 ```
 
-In `android/gradle/wrapper/gradle-wrapper.properties`
+* Refer to official OneSignal setup documentation for Gradle setup: https://documentation.onesignal.com/docs/android-sdk-setup#section-1-gradle-setup
+
+<!-- In `android/gradle/wrapper/gradle-wrapper.properties`
 ```javascript
 ...
 
@@ -108,9 +110,9 @@ distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 distributionUrl=https://services.gradle.org/distributions/gradle-2.14.1-all.zip
-```
+``` -->
 
-In `android/build.gradle`
+<!-- In `android/build.gradle`
 ```gradle
 ...
 
@@ -120,9 +122,9 @@ dependencies {
     // NOTE: Do not place your application dependencies here; they belong
     // in the individual module build.gradle files
 }
-```
+``` -->
 
-In `android/app/build.gradle`
+<!-- In `android/app/build.gradle`
 
 ```gradle
 ...
@@ -137,7 +139,7 @@ android {
                                 onesignal_google_project_number: "REMOTE"]
     }
 }
-```
+``` -->
 
 ## iOS Installation
 
@@ -283,8 +285,6 @@ Notification object received example:
 
 ### Sending and Getting OneSignal Tags
 
-We exposed the tags API of OneSignal to allow you to target users with notification later.
-
 ```javascript
 // Sending single tag
 OneSignal.sendTag("key", "value");
@@ -311,7 +311,6 @@ OneSignal.syncHashedEmail("test@domain.com");
 
 ### Getting Player ID and Push Token
 
-We exposed the idsAvailable API of OneSignal (both Android & iOS) as an event.
 Listen for `ids` event and define a callback to handle the returned object.
 
 ```javascript
@@ -328,9 +327,7 @@ onIds(device) {
 }
 ```
 
-### Enable Vibration
-
-We exposed the enableVibrate API of OneSignal (Android only).
+### Enable Vibration (Android Only)
 
 *You can call this from your UI from a button press for example to give your user's options for your notifications. By default OneSignal always vibrates the device when a notification is displayed unless the device is in a total silent mode. Passing false means that the device will only vibrate lightly when the device is in it's vibrate only mode.*
 
@@ -339,9 +336,7 @@ We exposed the enableVibrate API of OneSignal (Android only).
 OneSignal.enableVibrate(true);
 ```
 
-### Enable Sound
-
-We exposed the enableSound API of OneSignal (Android only).
+### Enable Sound (Android Only)
 
 *You can call this from your UI from a button press for example to give your user's options for your notifications. By default OneSignal plays the system's default notification sound when the device's notification system volume is turned on. Passing false means that the device will only vibrate unless the device is set to a total silent mode.*
 
@@ -351,8 +346,6 @@ OneSignal.enableSound(true);
 ```
 
 ### Set In App Focus Behavior
-
-We exposed the inFocusDisplaying API of OneSignal.
 
 #### Android:
 
@@ -381,8 +374,6 @@ self.oneSignal = [[RCTOneSignal alloc] initWithLaunchOptions:launchOptions
 
 ### Change User Subscription Status
 
-We exposed the setSubscription API of OneSignal (both Android & iOS).
-
 *You can call this method with false to opt users out of receiving all notifications through OneSignal. You can pass true later to opt users back into notifications*
 
 ```javascript
@@ -392,8 +383,6 @@ OneSignal.setSubscription(true);
 
 
 ### Check Push Notification and User Subscription Status
-
-We exposed the getPermissionSubscriptionState API of OneSignal (both Android & iOS).
 
 *Allows you to check whether notifications are enabled for the app, whether user is subscribed to notifications through OneSignal, and what the user's in-app subscription preference is. It also provides access to pushToken and userId*
 
@@ -406,8 +395,8 @@ OneSignal.getPermissionSubscriptionState((status) => {
 
 ### Post Notification (Peer-to-Peer Notifications)
 
-We exposed the postNotification API of OneSignal, currently supports one Player ID to send a notification to.
-We call it internally P2P Notification, and therefore there is a special attribute to listen to while receiving the notification.
+Currently supports one Player ID to send a notification to.
+It is internally called 'p2p_notification', and therefore there is a special attribute to listen to while receiving the notification.
 
 *Allows you to send notifications from user to user or schedule ones in the future to be delivered to the current device.*
 
@@ -433,8 +422,6 @@ onNotificationOpened: function(message, data, isActive) {
 
 ### Prompt Location
 
-We exposed the promptLocation API of OneSignal.
-
 *Prompts the user for location permissions. This allows for geotagging so you can send notifications to users based on location.
 Note: Make sure you also have the required location permission in your AndroidManifest.xml. For iOS, make sure you set the NSLocationWhenInUseUsageDescription or the NSLocationAlwaysUsageDescription in your info.plist. (Location Always also requires the location background mode capability)*
 
@@ -445,8 +432,6 @@ OneSignal.promptLocation();
 
 ### Clear Notifications (Android Only)
 
-We exposed the clearOneSignalNotifications API of OneSignal (currently supported only on Android).
-
 *Removes all OneSignal notifications from the Notification Shade.*
 
 ```javascript
@@ -455,8 +440,6 @@ OneSignal.clearOneSignalNotifications();
 ```
 
 ### Cancel Notifications (Android Only)
-
-We exposed the cancelNotification API of OneSignal (currently supported only on Android).
 
 *Cancels a single OneSignal notification based on its Android notification integer id. You can get the notification Id when invoking OneSignal.onNotificationOpened while receiving a notification.*
 
@@ -478,8 +461,6 @@ OneSignal.checkPermissions((permissions) => {
 
 ### Request Push Notification Permissions (iOS Only)
 
-We exposed the requestPermissions method (currently supported only on iOS).
-
 ```javascript
 // Setting requestPermissions
 permissions = {
@@ -491,8 +472,6 @@ OneSignal.requestPermissions(permissions);
 ```
 
 ### Register For Push Notifications (iOS Only)
-
-We exposed the registerForPushNotifications API of OneSignal (currently supported only on iOS).
 
 *Call when you want to prompt the user to accept push notifications. Only call once and only if you passed @NO to `kOSSettingsKeyAutoPrompt` on init.
 
