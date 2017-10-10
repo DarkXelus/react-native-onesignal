@@ -45,10 +45,6 @@ public class RNOneSignal extends ReactContextBaseJavaModule implements Lifecycle
     private boolean oneSignalInitDone;
     private OneSignal.Builder oneSignalBuilder;
 
-    private volatile OneSignalLifecycleState currentState;
-    private ConcurrentHashMap<Integer,Bundle> pendingOpenedNotifBundles = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<Integer,Bundle> pendingReceivedNotifBundles = new ConcurrentHashMap<>();
-
     public RNOneSignal(ReactApplicationContext reactContext) {
         super(reactContext);
         mReactContext = reactContext;
@@ -319,34 +315,6 @@ public class RNOneSignal extends ReactContextBaseJavaModule implements Lifecycle
 
     @Override
     public void onHostResume() {
-        currentState = OneSignalLifecycleState.RESUMED;
-
         initOneSignal();
-
-        if(!pendingOpenedNotifBundles.isEmpty()) {
-            Log.i("OneSignal", "pending opened notifications");
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    for(Map.Entry<Integer,Bundle> pendingOpenedNotif : pendingOpenedNotifBundles.entrySet()) {
-                        Log.i("OneSignal", "sending event for pending opened notifs");
-                        notifyNotificationOpened(pendingOpenedNotif.getValue());
-                    }
-                }
-            },1000);
-        }
-
-        if(!pendingReceivedNotifBundles.isEmpty()) {
-            Log.i("OneSignal", "pending received notifications");
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    for(Map.Entry<Integer,Bundle> pendingReceivedNotif : pendingReceivedNotifBundles.entrySet()) {
-                        Log.i("OneSignal", "sending event for pending received notifs");
-                        notifyNotificationReceived(pendingReceivedNotif.getValue());
-                    }
-                }
-            },1000);
-        }
     }
 }
