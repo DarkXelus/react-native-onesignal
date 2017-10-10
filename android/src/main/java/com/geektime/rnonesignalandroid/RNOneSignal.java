@@ -29,9 +29,6 @@ import com.onesignal.OneSignal;
 import org.json.JSONObject;
 import org.json.JSONException;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 
 /**
  * Created by Avishay on 1/31/16.
